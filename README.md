@@ -1,2 +1,3 @@
 # ui5-next-loader
-next-generation-ui5 loader
+
+Next-Generation-UI5 loader
