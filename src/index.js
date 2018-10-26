@@ -20,18 +20,18 @@ const regExecAll = function (r, string) {
   return matches;
 };
 
-const resolve = (modulePath, sourceFilename, opt) => {
+const resolve = (m, filename, opt) => {
   const namepath = opt.namespace.replace(/\./g, "/");
   const sourceRoot = path.resolve(opt.sourceRoot ? opt.sourceRoot : process.cwd());
-  let absPath = path.resolve(sourceRoot, `./${modulePath}`);
-  if (modulePath.startsWith(namepath)) {
-    absPath = path.resolve(sourceRoot, `./${modulePath.replace(namepath, "")}`);
+  var absPath = path.resolve(sourceRoot, `./${m}`);
+  if (m.startsWith(namepath)) {
+    absPath = path.resolve(sourceRoot, `./${m.replace(namepath, "")}`);
   }
   if (!absPath.endsWith(".js")) {
     absPath += ".js";
   }
   if (fs.existsSync(absPath)) {
-    let relativePath = path.relative(path.dirname(sourceFilename), absPath);
+    var relativePath = path.relative(path.dirname(filename), absPath);
     if (!relativePath.startsWith(".")) {
       relativePath = "./" + relativePath;
     }
@@ -39,7 +39,7 @@ const resolve = (modulePath, sourceFilename, opt) => {
     return relativePath;
   } else {
     try {
-      const r = require.resolve(modulePath);
+      const r = require.resolve(m);
       if (r) {
         return r;
       }
@@ -47,8 +47,8 @@ const resolve = (modulePath, sourceFilename, opt) => {
       // ignore
     }
 
-    if (!modulePath.startsWith("sap")) {
-      warn(`WARN: \nDependency "${absPath}" of "${path.relative(sourceRoot, sourceFilename)}" is not found in ${sourceRoot}.\n`);
+    if (!m.startsWith("sap")) {
+      warn(`WARN: \nDependency "${absPath}" of "${path.relative(sourceRoot, filename)}" is not found in ${sourceRoot}.\n`);
     }
     return null;
   }
