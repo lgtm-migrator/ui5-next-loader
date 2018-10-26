@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const utils = require("loader-utils");
-const { get, map, isEmpty } = require("lodash");
+const { get, map, isEmpty, concat } = require("lodash");
 
 const { warn } = require("console");
 
@@ -56,18 +56,24 @@ const resolve = (modulePath, sourceFilename, opt) => {
 
 const resolveManifest = (path) => {
 
+  var rt = []
   const content = fs.readFileSync(path);
   const manifest = JSON.parse(content);
   const routing = get(manifest, ["sap.ui5", "routing"], {});
+  const rootViewName = get(manifest, ["sap.ui5", "rootView", "viewName"], "")
+
+  if (rootViewName) {
+    rt.push(`${rootViewName.replace(/\./g, "/")}.view`)
+  }
+
   const { config, targets } = routing;
   if (config && targets) {
     var viewBase = config.viewPath.replace(/\./g, "/");
     var viewPath = map(targets, t => `${viewBase}/${t.viewName}.view`);
-    return viewPath;
-  } else {
-    return [];
+    rt = concat(rt, viewPath)
   }
 
+  return rt;
 };
 
 const resolveJSView = (source = "") => {
