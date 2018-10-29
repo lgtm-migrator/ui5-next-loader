@@ -5,6 +5,11 @@ const { get, map, isEmpty, concat } = require("lodash");
 
 const { warn } = require("console");
 
+/**
+ * find all pattern match reg
+ * @param {*} r 
+ * @param {*} string 
+ */
 const regExecAll = function (r, string) {
   var match = null;
   var matches = [];
@@ -20,6 +25,12 @@ const regExecAll = function (r, string) {
   return matches;
 };
 
+/**
+ * resolve path from different path
+ * @param {*} m 
+ * @param {*} filename 
+ * @param {*} opt 
+ */
 const resolve = (m, filename, opt) => {
   const namepath = opt.namespace.replace(/\./g, "/");
   const sourceRoot = path.resolve(opt.sourceRoot ? opt.sourceRoot : process.cwd());
@@ -54,6 +65,10 @@ const resolve = (m, filename, opt) => {
   }
 };
 
+/**
+ * resolve ui5 manifest file
+ * @param {*} path 
+ */
 const resolveManifest = (path) => {
 
   var rt = []
@@ -125,10 +140,21 @@ module.exports = function (source, map) {
 
   }
 
+  /**
+   * UIComponent will load views from manifest
+   */
+
   if (/UIComponent\.extend/g.test(source)) {
-    const views = resolveManifest(`${this.context}/manifest.json`);
-    views.forEach(v => requires.push(`require("${resolve(v, filename, opt)}");`));
+    const manifestPath = `${this.context}/manifest.json`
+    if (fs.existsSync(manifestPath)) {
+      const views = resolveManifest();
+      views.forEach(v => requires.push(`require("${resolve(v, filename, opt)}");`));
+    }
   }
+
+  /**
+   * some component will include jsview
+   */
 
   const importedViews = resolveJSView(source);
   if (!isEmpty(importedViews)) {
